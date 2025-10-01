@@ -1,0 +1,176 @@
+basePath: /
+definitions:
+  models.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  models.LoginResponse:
+    properties:
+      token:
+        type: string
+      user:
+        properties:
+          email:
+            type: string
+          id:
+            type: integer
+          name:
+            type: string
+        type: object
+    type: object
+  models.RegisterRequest:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        minLength: 6
+        type: string
+    required:
+    - email
+    - name
+    - password
+    type: object
+  models.RegisterResponse:
+    properties:
+      email:
+        type: string
+      id:
+        type: integer
+      message:
+        type: string
+      name:
+        type: string
+    type: object
+  models.Response:
+    properties:
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+host: localhost:3000
+info:
+  contact: {}
+  description: RESTful API created using gin for Final Phase 3
+  title: Final Phase 3
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Login dengan email & password, hasilkan JWT token
+      parameters:
+      - description: Login Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.LoginResponse'
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Invalid credentials
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Login user
+      tags:
+      - auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Buat akun baru (name, email, password)
+      parameters:
+      - description: Register Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.RegisterResponse'
+        "400":
+          description: Invalid request body or validation failed
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: User already exists
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Database or hashing error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Register user
+      tags:
+      - auth
+  /posts/:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Membuat postingan baru dengan teks dan/atau gambar. Harus login.
+      parameters:
+      - description: Konten teks postingan
+        in: formData
+        name: content
+        type: string
+      - description: File gambar (jpg, png, dll)
+        in: formData
+        name: image
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Postingan berhasil dibuat
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Format data tidak valid / konten kosong
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: User tidak terautentikasi
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Server error / gagal simpan file / DB
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Membuat Postingan Baru
+      tags:
+      - posts
+swagger: "2.0"
